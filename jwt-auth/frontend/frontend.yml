@@ -1,0 +1,74 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 8080
+      targetPort: 9090
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: frontend
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  labels:
+    app: frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+        # consul.hashicorp.com/connect-service-upstreams: 'virtual-backend:9091'
+    spec:
+      serviceAccountName: frontend
+      containers:
+        - name: frontend
+          image: panchalravi/fake-service:0.24.2
+          ports:
+            - containerPort: 9090
+          env:
+            - name: 'LISTEN_ADDR'
+              value: '0.0.0.0:9090'
+            - name: 'UPSTREAM_URIS'
+              value: 'http://backend.virtual.consul/health'
+            - name: 'NAME'
+              value: 'frontend'
+            - name: 'MESSAGE'
+              value: 'Hello World'
+            - name: 'HEALTH_CHECK_RESPONSE_CODE'
+              value: '200'
+            - name: 'READY_CHECK_RESPONSE_SUCCESS_CODE'
+              value: '200'
+          livenessProbe:
+            initialDelaySeconds: 3
+            httpGet:
+              path: /health
+              port: 9090
+          readinessProbe:
+            initialDelaySeconds: 3
+            httpGet:
+              path: /ready
+              port: 9090
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"

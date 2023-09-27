@@ -1,0 +1,26 @@
+---
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceIntentions
+metadata:
+  name: backend
+spec:
+  destination:
+    name: backend
+  # jwt:
+  #   providers:
+  #   - name: auth0
+  sources:
+  - name: frontend
+    permissions:
+    - action: allow
+      http:
+        pathExact: "/health"
+      jwt:
+        providers:
+        - name: auth0
+          verifyClaims:
+          - path: ["name"]
+            value: "analyst"
+    - action: allow
+      http:
+        pathPrefix: "/"

@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-v2
+  labels:
+    app: backend
+    release: v2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: backend
+      release: v2
+  template:
+    metadata:
+      labels:
+        app: backend
+        release: v2
+      annotations:
+        consul.hashicorp.com/connect-inject: 'true'
+        consul.hashicorp.com/service-meta-version: "v2"
+    spec:
+      serviceAccountName: backend
+      containers:
+        - name: backend
+          image: panchalravi/fake-service:0.24.2
+          ports:
+            - containerPort: 9091
+          env:
+            - name: 'LISTEN_ADDR'
+              value: '127.0.0.1:9091'
+            - name: 'NAME'
+              value: 'backend-v2'
+            - name: 'MESSAGE'
+              value: 'backend-v2'
+            - name: 'ERROR_RATE'
+              value: '0'
+            - name: 'ERROR_CODE'
+              value: '500'
+          securityContext:
+            privileged: true
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "100m"
+              memory: "128Mi"

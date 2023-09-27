@@ -1,0 +1,12 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: JWTProvider
+metadata:
+  name: auth0
+spec:
+  issuer: auth0
+  jsonWebKeySet:
+    remote:
+      uri: https://dev-qn4ll0wqf1jbzac8.us.auth0.com/.well-known/jwks.json
+      # cacheDuration: "30m"
+  forwarding:
+    headerName: user-token

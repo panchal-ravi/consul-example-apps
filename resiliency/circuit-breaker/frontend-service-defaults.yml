@@ -1,0 +1,16 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceDefaults
+metadata:
+  name: frontend
+spec:
+  upstreamConfig:
+    defaults:
+      passiveHealthCheck:
+        interval: "10s"
+        maxFailures: 3 
+      limits:
+        maxPendingRequests: 1
+        maxConnections: 1
+        maxConcurrentRequests: 1
+
+
